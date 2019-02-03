@@ -51,13 +51,14 @@ class ScreepsStatsd
       qs:
         path: 'stats'
     rp(options)
-      .then (x) =>
-        return unless x.body.data
-        data = x.body.data.split('gz:')[1]
-        finalData = JSON.parse zlib.gunzipSync(new Buffer(data, 'base64')).toString()
-        @report(finalData)
-      .catch (e) =>
-        clearInterval timeout
+    .then (x) =>
+      return unless x.body.data
+      data = x.body.data.split('gz:')[1]
+      finalData = JSON.parse zlib.gunzipSync(new Buffer(data, 'base64')).toString()
+      @report(finalData)
+    .catch (e) =>
+      clearInterval timeout
+      throw e
 
   report: (data, prefix="") =>
     if prefix is ''
