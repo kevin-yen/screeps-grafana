@@ -49,6 +49,7 @@ class ScreepsStatsd
           password: process.env.SCREEPS_PASSWORD
       rp(options).then (x) =>
         token = x.token
+    console.log(token);
     @getMemory()
 
   getMemory: () =>
