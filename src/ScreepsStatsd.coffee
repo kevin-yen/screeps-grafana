@@ -19,7 +19,7 @@ rp = require 'request-promise'
 zlib = require 'zlib'
 # require('request-debug')(rp)
 StatsD = require 'node-statsd'
-token = ""
+token = process.env.SCREEPS_TOKEN || ""
 succes = false
 class ScreepsStatsd
 
@@ -32,29 +32,24 @@ class ScreepsStatsd
   ###
   run: ( string ) ->
     rp.defaults jar: true
+    @client = new StatsD host: process.env.GRAPHITE_PORT_8125_UDP_ADDR
     @loop()
 
     setInterval @loop, 15000
 
   loop: () =>
-    @signin()
-
-  signin: () =>
-    if(token != "" && succes)
-      @getMemory()
-      return
-    @client = new StatsD host: process.env.GRAPHITE_PORT_8125_UDP_ADDR
-    console.log "New login request - " + new Date()
-    options =
-      uri: 'https://screeps.com/api/auth/signin'
-      json: true
-      method: 'POST'
-      body:
-        email: process.env.SCREEPS_EMAIL
-        password: process.env.SCREEPS_PASSWORD
-    rp(options).then (x) =>
-      token = x.token
-      @getMemory()
+    if(token == "")
+      console.log "New login request - " + new Date()
+      options =
+        uri: 'https://screeps.com/api/auth/signin'
+        json: true
+        method: 'POST'
+        body:
+          email: process.env.SCREEPS_EMAIL
+          password: process.env.SCREEPS_PASSWORD
+      rp(options).then (x) =>
+        token = x.token
+    @getMemory()
 
   getMemory: () =>
     succes = false
